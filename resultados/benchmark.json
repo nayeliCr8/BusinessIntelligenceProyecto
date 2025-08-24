@@ -1,0 +1,42 @@
+[
+  {
+    "nombre": "REST API - Estadísticas",
+    "url": "http://localhost:8080/api/estadisticas",
+    "pruebas_totales": 5,
+    "pruebas_exitosas": 5,
+    "tiempo_promedio_ms": 9.276437759399414,
+    "tiempo_minimo_ms": 3.5600662231445312,
+    "tiempo_maximo_ms": 27.556896209716797,
+    "fecha_prueba": "2025-08-24T08:31:26.902602"
+  },
+  {
+    "nombre": "GraphQL API - Estadísticas",
+    "url": "http://localhost:4000/graphql",
+    "pruebas_totales": 5,
+    "pruebas_exitosas": 5,
+    "tiempo_promedio_ms": 8.393716812133789,
+    "tiempo_minimo_ms": 3.1957626342773438,
+    "tiempo_maximo_ms": 13.701915740966797,
+    "fecha_prueba": "2025-08-24T08:31:31.991895"
+  },
+  {
+    "nombre": "LAMBDA - Batch Processing",
+    "url": "http://localhost:8080/api/estadisticas",
+    "pruebas_totales": 5,
+    "pruebas_exitosas": 5,
+    "tiempo_promedio_ms": 8.504486083984375,
+    "tiempo_minimo_ms": 3.993511199951172,
+    "tiempo_maximo_ms": 17.039060592651367,
+    "fecha_prueba": "2025-08-24T08:31:37.083229"
+  },
+  {
+    "nombre": "KAPPA - Stream Processing",
+    "url": "http://localhost:4000/graphql",
+    "pruebas_totales": 5,
+    "pruebas_exitosas": 5,
+    "tiempo_promedio_ms": 7.506513595581055,
+    "tiempo_minimo_ms": 4.536628723144531,
+    "tiempo_maximo_ms": 12.285947799682617,
+    "fecha_prueba": "2025-08-24T08:31:42.160839"
+  }
+]
