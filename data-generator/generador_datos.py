@@ -7,12 +7,12 @@ import os
 class GeneradorDatos:
     def __init__(self):
         self.contador = 0
-        # Crear carpetas si no existen
+         
         os.makedirs("lambda-architecture", exist_ok=True)
         os.makedirs("kappa-architecture", exist_ok=True)
     
     def generar_dato_sensor(self):
-        """Genera datos falsos de sensores IoT"""
+        """Genera datos de sensores IoT"""
         self.contador += 1
         return {
             "id": self.contador,

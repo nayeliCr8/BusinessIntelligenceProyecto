@@ -16,8 +16,8 @@ public class ApiRestApplication {
     
     public static void main(String[] args) {
         SpringApplication.run(ApiRestApplication.class, args);
-        System.out.println("🚀 API REST ejecutándose en: http://localhost:8080");
-        System.out.println("📋 Endpoints disponibles:");
+        System.out.println("API REST ejecutándose en: http://localhost:8080");
+        System.out.println("Endpoints disponibles:");
         System.out.println("   GET  /api/estadisticas");
         System.out.println("   GET  /api/datos");
         System.out.println("   POST /api/agregar");
@@ -26,7 +26,7 @@ public class ApiRestApplication {
     // Health check
     @GetMapping
     public String hola() {
-        return "✅ API REST funcionando - " + LocalDateTime.now();
+        return "API REST funcionando - " + LocalDateTime.now();
     }
     
     // Obtener estadísticas
@@ -67,7 +67,7 @@ public class ApiRestApplication {
         datos.add(nuevoDato);
         
         Map<String, Object> respuesta = new HashMap<>();
-        respuesta.put("mensaje", "✅ Dato agregado exitosamente");
+        respuesta.put("mensaje", "Dato agregado exitosamente");
         respuesta.put("id", datos.size());
         respuesta.put("dispositivo", nuevoDato.get("dispositivo"));
         

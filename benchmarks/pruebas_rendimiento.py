@@ -3,20 +3,28 @@ import time
 import statistics
 import json
 from datetime import datetime
+import psutil  #CPU y memoria
 
 class ProbadorRendimiento:
     def __init__(self):
         self.resultados = []
     
     def probar_endpoint(self, nombre, url, metodo='GET', datos=None, headers=None):
-        """Prueba un endpoint y mide tiempo de respuesta"""
+        """Prueba un endpoint y mide tiempo de respuesta, latencia, CPU, memoria y throughput"""
         print(f"\n Probando: {nombre}")
         print(f"   URL: {url}")
         
         tiempos = []
+        latencias = []
         exitosos = 0
         
-        for i in range(5):  # 5 pruebas
+        #metricas iniciales de sistema
+        cpu_inicial = psutil.cpu_percent(interval=0.5)
+        memoria_inicial = psutil.virtual_memory().percent
+        
+        inicio_total = time.time()
+        
+        for i in range(50):  #50 pruebas
             try:
                 inicio = time.time()
                 
@@ -29,9 +37,13 @@ class ProbadorRendimiento:
                 
                 if response.status_code == 200:
                     tiempo_ms = (fin - inicio) * 1000
+                    latencia_ms = response.elapsed.total_seconds() * 1000
+                    
                     tiempos.append(tiempo_ms)
+                    latencias.append(latencia_ms)
                     exitosos += 1
-                    print(f" -> Prueba {i+1}: {tiempo_ms:.2f} ms")
+                    
+                    print(f" -> Prueba {i+1}: {tiempo_ms:.2f} ms (latencia {latencia_ms:.2f} ms)")
                 else:
                     print(f" -> Prueba {i+1}: Error {response.status_code}")
                     
@@ -40,16 +52,30 @@ class ProbadorRendimiento:
             
             time.sleep(1)  # Espera entre pruebas
         
-        # Guardar resultados
+        fin_total = time.time()
+        total_duracion = fin_total - inicio_total
+        
+        #metricas finales de sistema
+        cpu_final = psutil.cpu_percent(interval=0.5)
+        memoria_final = psutil.virtual_memory().percent
+        
         if tiempos:
+            throughput = exitosos / total_duracion
+            
             resultado = {
                 'nombre': nombre,
                 'url': url,
-                'pruebas_totales': 5,
+                'pruebas_totales': 50,
                 'pruebas_exitosas': exitosos,
                 'tiempo_promedio_ms': statistics.mean(tiempos),
                 'tiempo_minimo_ms': min(tiempos),
                 'tiempo_maximo_ms': max(tiempos),
+                'latencia_promedio_ms': statistics.mean(latencias) if latencias else None,
+                'cpu_inicial_%': cpu_inicial,
+                'cpu_final_%': cpu_final,
+                'memoria_inicial_%': memoria_inicial,
+                'memoria_final_%': memoria_final,
+                'throughput_req_s': throughput,
                 'fecha_prueba': datetime.now().isoformat()
             }
             
@@ -57,44 +83,31 @@ class ProbadorRendimiento:
             
             print(f"\n    RESULTADOS {nombre}:")
             print(f"      Tiempo promedio: {resultado['tiempo_promedio_ms']:.2f} ms")
-            print(f"      Rango: {resultado['tiempo_minimo_ms']:.2f} - {resultado['tiempo_maximo_ms']:.2f} ms")
-            print(f"      Éxitos: {resultado['pruebas_exitosas']}/5")
+            print(f"      Latencia promedio: {resultado['latencia_promedio_ms']:.2f} ms")
+            print(f"      CPU: {cpu_inicial:.2f}% -> {cpu_final:.2f}%")
+            print(f"      Memoria: {memoria_inicial:.2f}% -> {memoria_final:.2f}%")
+            print(f"      Throughput: {throughput:.2f} req/s")
         
         return tiempos
     
-    def comparar_arquitecturas(self):
-        """Compara Lambda vs Kappa"""
-        print(" COMPARANDO ARQUITECTURAS DE INGESTA:")
+    def ejecutar_pruebas_completas(self):
+        print(" INICIANDO PRUEBAS DE RENDIMIENTO COMPLETAS")
+        print("=" * 60)
         
-        # Probar Lambda
-        lambda_batch = self.probar_endpoint(
-            "LAMBDA - Batch Processing", 
-            "http://localhost:8080/api/estadisticas"
-        )
+        print("Ojo: Asegurarse de tener ejecutando:")
+        print("   - API REST: http://localhost:8080")
+        print("   - API GraphQL: http://localhost:4000")
         
-        # Probar Kappa (simulado)
-        kappa_stream = self.probar_endpoint(
-            "KAPPA - Stream Processing", 
-            "http://localhost:4000/graphql",
-            'POST',
-            {"query": "{ estadisticas { totalDatos temperaturaPromedio } }"},
-            {"Content-Type": "application/json"}
-        )
+        input("\nPresiona Enter para iniciar las pruebas...")
         
-        return lambda_batch, kappa_stream
-    
-    def comparar_apis(self):
-        """Compara REST vs GraphQL"""
-        print(" COMPARANDO APIS:")
-        
-        # REST API
-        rest_stats = self.probar_endpoint(
+        #Resgt API
+        self.probar_endpoint(
             "REST API - Estadísticas", 
             "http://localhost:8080/api/estadisticas"
         )
         
-        # GraphQL API
-        graphql_stats = self.probar_endpoint(
+        #GraphQL API
+        self.probar_endpoint(
             "GraphQL API - Estadísticas",
             "http://localhost:4000/graphql",
             'POST',
@@ -102,37 +115,14 @@ class ProbadorRendimiento:
             {"Content-Type": "application/json"}
         )
         
-        return rest_stats, graphql_stats
-    
-    def ejecutar_pruebas_completas(self):
-        """Ejecuta todas las pruebas"""
-        print(" INICIANDO PRUEBAS DE RENDIMIENTO COMPLETAS")
-        print("=" * 60)
-        
-        print("Ojo:  Asegurarme de tener ejecutando:")
-        print("   - API REST: http://localhost:8080")
-        print("   - API GraphQL: http://localhost:4000")
-        
-        input("\nPresiona Enter para iniciar las pruebas...")
-        
-        # Ejecutar pruebas
-        self.comparar_apis()
-        self.comparar_arquitecturas()
-        
-        # Guardar resultados
+        #Guardar resultados
         with open('resultados/benchmark.json', 'w', encoding='utf-8') as f:
             json.dump(self.resultados, f, indent=2, ensure_ascii=False)
         
         print("\n ¡TODAS LAS PRUEBAS COMPLETADAS!")
         print(" Resultados guardados en: resultados/benchmark.json")
-        
-        # Mostrar resumen
-        print("\n" + "=" * 60)
-        print(" RESUMEN FINAL:")
-        for resultado in self.resultados:
-            print(f"   {resultado['nombre']}: {resultado['tiempo_promedio_ms']:.2f} ms")
 
-# Ejecutar pruebas
+# Ejecutar
 if __name__ == "__main__":
     probador = ProbadorRendimiento()
     probador.ejecutar_pruebas_completas()
